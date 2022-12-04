@@ -90,7 +90,16 @@ const getWords = async (denops: Denops): Promise<ReadonlyArray<Word>> => {
     words = words.filter((word) => word.text.match(regexp) != null);
   }
 
-  return words;
+  const pos = await denops.call("getcurpos") as number[];
+
+  return words.toSorted((a, b) => {
+    const lineDiff = Math.abs(a.pos.line - pos[1]) -
+      Math.abs(b.pos.line - pos[1]);
+    if (lineDiff !== 0) {
+      return lineDiff;
+    }
+    return Math.abs(a.pos.col - pos[2]) - Math.abs(b.pos.col - pos[2]);
+  });
 };
 
 const getTarget = (
